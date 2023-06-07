@@ -1,0 +1,81 @@
+Step1: Open CubeMX & Create New Project
+
+Step2: Choose The Target MCU & Double-Click Its Name
+
+Step3: Configure A0 pin to be a GPIO output pin
+
+Step4: Select the timer you’re willing to use for the delay. Let it be TIMER4, just enable the clock
+
+No other configuration for the timer is needed. It’s all done in the code. However, don’t forget to remove the HAL_TIM_Config() from the main.c code as you won’t use it.
+Step5: Set The RCC External Clock Source
+
+Step6: Go To The Clock Configuration
+
+Step7: Set The System Clock To Be 72MHz
+
+Step8: Name & Generate The Project Initialization Code For CubeIDE or The IDE You’re Using
+
+Step9: Add The util directory & add it to the path as a source code directory
+
+Copy the util folder that you’ve downloaded earlier
+
+Open the project in CubeIDE and right-click the project name and click paste
+
+The folder will be added to your project. However, it’s not considered as a source code directory, so it won’t be compiled and give you linking error in the linking stage if you call any of its functions.
+Right-click the util folder and click properties. And navigate to C/C++ paths and symbols, and source locations tab.
+In the source locations tab, click add folder and add our util folder.
+That’s it, now it’s properly added to our project and can be included in the application code (in main.c).
+
+Can you notice that little icon changes in the util folder? this indicates that the IDE knows that this is a source code directory. It wasn’t like that when we first added it.
+Step10: The Last step is to remove the timer config function from the main.c file & make sure to name the timer instance correctly in the TimerDelay.c file
+
+#define TIMER  TIM4
+ 
+ Here is The Application Code For This LAB
+
+Note that the hal_timer_config function is removed and never called. The timer initialization is now done in the TimerDelay_Init() routine.
+
+#include "main.h"
+#include "../util/Timer_Delay.h"
+#include "../util/DWT_Delay.h"
+ 
+void SystemClock_Config(void);
+static void MX_GPIO_Init(void);
+ 
+int main(void)
+{
+    HAL_Init();
+    SystemClock_Config();
+    MX_GPIO_Init();
+    /* Initialize The TimerDelay*/
+    TimerDelay_Init();
+ 
+    while (1)
+    {
+        HAL_GPIO_TogglePin(GPIOA, GPIO_PIN_0);
+        delay_ms(100);
+    }
+}
+Or you can delay with the WDT as in the following application
+
+#include "main.h"
+#include "../util/Timer_Delay.h"
+#include "../util/DWT_Delay.h"
+ 
+void SystemClock_Config(void);
+static void MX_GPIO_Init(void);
+ 
+int main(void)
+{
+    HAL_Init();
+    SystemClock_Config();
+    MX_GPIO_Init();
+    /* Initialize The DWT_Delay*/
+    DWT_Delay_Init();
+ 
+    while (1)
+    {
+        HAL_GPIO_TogglePin(GPIOA, GPIO_PIN_0);
+        DWT_Delay_ms(100);
+    }
+}
